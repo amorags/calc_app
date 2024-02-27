@@ -1,0 +1,24 @@
+name: Test, Build and Deploy for Web
+on: push
+permissions:
+  contents: write
+jobs:
+  build:
+    name: Test and Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        cache: true
+        cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+        cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
+    - run: flutter --version
+    - run: flutter pub get
+    - run: flutter test
+    - run: sh web_test.sh
+    - run: flutter build web --base-href /${{ github.event.repository.name }}/
+    - uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: build/web
