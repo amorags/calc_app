@@ -104,11 +104,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       return;
     }
 
-    if (value == Btn.per) {
-      convertToPercentage();
-      return;
-    }
-
     if (value == Btn.calculate) {
       calculate();
       return;
@@ -156,29 +151,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
   }
 
-  // ##############
-  // converts output to %
-  void convertToPercentage() {
-    // ex: 434+324
-    if (number1.isNotEmpty && operand.isNotEmpty && number2.isNotEmpty) {
-      // calculate before conversion
-      calculate();
-    }
 
-    if (operand.isNotEmpty) {
-      // cannot be converted
-      return;
-    }
-
-    final number = double.parse(number1);
-    setState(() {
-      number1 = "${(number / 100)}";
-      operand = "";
-      number2 = "";
-    });
-  }
-
-  // ##############
   // clears all output
   void clearAll() {
     setState(() {
@@ -188,7 +161,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
   }
 
-  // ##############
   // delete one from the end
   void delete() {
     if (number2.isNotEmpty) {
@@ -244,17 +216,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   // ########
   Color getBtnColor(value) {
-    return [Btn.del, Btn.clr].contains(value)
-        ? Colors.blueGrey
+    return [Btn.del, Btn.clr, Btn.calculate].contains(value)
+        ? Colors.deepOrangeAccent
         : [
-      Btn.per,
       Btn.multiply,
       Btn.add,
       Btn.subtract,
-      Btn.divide,
-      Btn.calculate,
+      Btn.divide
     ].contains(value)
-        ? Colors.orange
-        : Colors.black87;
+        ? Colors.white12
+        : Colors.blueGrey;
   }
 }
