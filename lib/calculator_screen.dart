@@ -94,6 +94,25 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             // output
             Expanded(
               child: SingleChildScrollView(
+                reverse: false,
+                child: Container(
+                  alignment: Alignment.topLeft,
+                  padding: const EdgeInsets.all(8),
+                  child: Text(
+                    calculator.stack.isEmpty
+                        ? ""
+                        : calculator.stack.join(" "),
+                    style: const TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.normal,
+                    ),
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
                 reverse: true,
                 child: Container(
                   alignment: Alignment.bottomRight,
@@ -115,7 +134,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               children: Btn.buttonValues
                   .map(
                     (value) => SizedBox(
-                  width: value == Btn.n0
+                  width: value == Btn.n0 || value == Btn.clr
                       ? screenSize.width / 2
                       : (screenSize.width / 4),
                   height: screenSize.width / 5,
@@ -168,24 +187,31 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     } else if (value == Btn.add) {
       calculator.execute(AddCommand());
       updateDisplay(calculator.stack.last);
+      displayValue = "0";
     } else if (value == Btn.subtract) {
       calculator.execute(SubCommand());
       updateDisplay(calculator.stack.last);
+      displayValue = "0";
     } else if (value == Btn.multiply) {
       calculator.execute(MultiCommand());
       updateDisplay(calculator.stack.last);
+      displayValue = "0";
     } else if (value == Btn.divide) {
       calculator.execute(DivideCommand());
       updateDisplay(calculator.stack.last);
+      displayValue = "0";
     } else {
       appendValue(value);
     }
   }
 
   void calculate() {
-    calculator.push(double.parse(displayValue));
+    setState(() {
+      calculator.push(double.parse(displayValue));
+    });
     displayValue = "0";
   }
+
 
   void clearAll() {
     setState(() {
