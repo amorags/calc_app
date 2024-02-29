@@ -20,14 +20,13 @@ class Btn {
   static const String n9 = "9";
 
   static const List<String> buttonValues = [
-    del,
     clr,
+    del,
     multiply,
-    divide,
     n7,
     n8,
     n9,
-    subtract,
+    divide,
     n4,
     n5,
     n6,
@@ -35,8 +34,9 @@ class Btn {
     n1,
     n2,
     n3,
-    calculate,
+    subtract,
     n0,
-    dot
+    dot,
+    calculate
   ];
 }
