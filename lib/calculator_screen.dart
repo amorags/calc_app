@@ -3,11 +3,104 @@ import 'package:flutter/material.dart';
 
 import 'button_values.dart';
 
+abstract class Command {
+  apply(List<num> stack);
+
+}
+abstract class Calculator {
+
+  push(num value);
+  execute(Command command);
+}
+
+
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
 
   @override
   State<CalculatorScreen> createState() => _CalculatorScreenState();
+}
+
+class AddCommand implements Command {
+  @override
+  void apply(List<num> stack) {
+
+    if (stack.length < 2) {
+      throw Exception("Insufficient operands for addition");
+    }
+    num operand2 = stack.removeLast();
+    num operand1 = stack.removeLast();
+    num result = operand1 + operand2;
+    stack.add(result);
+  }
+}
+
+class SubCommand implements Command {
+  @override
+  void apply(List<num> stack) {
+
+    if (stack.length < 2) {
+      throw Exception("Insufficient operands for subtraction");
+    }
+    num operand2 = stack.removeLast();
+    num operand1 = stack.removeLast();
+    num result = operand1 - operand2; // Rækkefølge !!
+    stack.add(result);
+  }
+
+}
+
+class MultiCommand implements Command {
+  @override
+  void apply(List<num> stack) {
+
+    if (stack.length < 2) {
+      throw Exception("Insufficient operands for multiplication");
+    }
+
+    num operand2 = stack.removeLast();
+    num operand1 = stack.removeLast();
+    num result = operand1 * operand2;
+    stack.add(result);
+
+  }
+}
+
+class DivideCommand implements Command {
+  @override
+  void apply(List<num> stack) {
+
+    if (stack.length < 2) {
+      throw Exception("Insufficient operands for division");
+    }
+    num divisor = stack.removeLast();
+    num dividend = stack.removeLast();
+    if (divisor == 0) {
+      throw Exception("Division by zero error");
+    }
+    num result = dividend / divisor; // Rækkefølge
+    stack.add(result);
+  }
+
+}
+
+class PushCommand implements Command {
+  @override
+  void apply(List<num> stack) {
+
+    if (stack.length < 2) {
+      throw Exception("Insufficient operands for division");
+    }
+    num divisor = stack.removeLast();
+    num dividend = stack.removeLast();
+    if (divisor == 0) {
+      throw Exception("Division by zero error");
+    }
+    num result = dividend / divisor; // Rækkefølge
+    stack.add(result);
+
+  }
+
 }
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
@@ -115,42 +208,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // ##############
   // calculates the result
   void calculate() {
-    if (number1.isEmpty) return;
-    if (operand.isEmpty) return;
-    if (number2.isEmpty) return;
 
-    final double num1 = double.parse(number1);
-    final double num2 = double.parse(number2);
-
-    var result = 0.0;
-    switch (operand) {
-      case Btn.add:
-        result = num1 + num2;
-        break;
-      case Btn.subtract:
-        result = num1 - num2;
-        break;
-      case Btn.multiply:
-        result = num1 * num2;
-        break;
-      case Btn.divide:
-        result = num1 / num2;
-        break;
-      default:
-    }
-
-    setState(() {
-      number1 = result.toStringAsPrecision(3);
-
-      if (number1.endsWith(".0")) {
-        number1 = number1.substring(0, number1.length - 2);
-      }
-
-      operand = "";
-      number2 = "";
-    });
   }
-
 
   // clears all output
   void clearAll() {
