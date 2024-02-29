@@ -11,20 +11,76 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ale_calculator/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  group('PushCommand', () {
+    test('Pushes a value to the stack', () {
+      final stack = [1, 2];
+      PushCommand(3).apply(stack);
+      expect(stack, [1, 2, 3]);
+    });
   });
+
+  group('AddCommand', () {
+    test('Remove the top two numbers and push the result', () {
+      final stack = [1, 2];
+      AddCommand().apply(stack);
+      expect(stack, [3]);
+    });
+
+    test('Nothing if there are less than two numbers', () {
+      final stack = [1];
+      final copy = [...stack];
+      AddCommand().apply(stack);
+      expect(stack, copy);
+    });
+  });
+}
+
+// Abstract Command class
+abstract class Command {
+  void apply(List<num> stack);
+  void unapply(List<num> stack);
+}
+
+class PushCommand implements Command {
+  final num value;
+
+  PushCommand(this.value);
+
+  @override
+  void apply(List<num> stack) {
+    stack.add(value);
+  }
+
+  @override
+  void unapply(List<num> stack) {
+    stack.removeLast();
+  }
+}
+
+// Avoid duplicating logic for each operation
+abstract class OperatorCommand implements Command {
+  late num operand1;
+  late num operand2;
+
+  num operate(num operand1, num operand2);
+
+  @override
+  void apply(List<num> stack) {
+    if (stack.length >= 2) {
+      operand2 = stack.removeLast();
+      operand1 = stack.removeLast();
+      stack.add(operate(operand1, operand2));
+    }
+  }
+
+  @override
+  void unapply(List<num> stack) {
+    stack.removeLast();
+    stack.addAll([operand1, operand2]);
+  }
+}
+
+class AddCommand extends OperatorCommand {
+  @override
+  num operate(num operand1, num operand2) => operand1 + operand2;
 }
