@@ -1,30 +1,13 @@
-
 import 'package:flutter/material.dart';
-
 import 'button_values.dart';
 
 abstract class Command {
-  apply(List<num> stack);
-
-}
-abstract class Calculator {
-
-  push(num value);
-  execute(Command command);
-}
-
-
-class CalculatorScreen extends StatefulWidget {
-  const CalculatorScreen({super.key});
-
-  @override
-  State<CalculatorScreen> createState() => _CalculatorScreenState();
+  void apply(List<num> stack);
 }
 
 class AddCommand implements Command {
   @override
   void apply(List<num> stack) {
-
     if (stack.length < 2) {
       throw Exception("Insufficient operands for addition");
     }
@@ -38,38 +21,32 @@ class AddCommand implements Command {
 class SubCommand implements Command {
   @override
   void apply(List<num> stack) {
-
     if (stack.length < 2) {
       throw Exception("Insufficient operands for subtraction");
     }
     num operand2 = stack.removeLast();
     num operand1 = stack.removeLast();
-    num result = operand1 - operand2; // Rækkefølge !!
+    num result = operand1 - operand2;
     stack.add(result);
   }
-
 }
 
 class MultiCommand implements Command {
   @override
   void apply(List<num> stack) {
-
     if (stack.length < 2) {
       throw Exception("Insufficient operands for multiplication");
     }
-
     num operand2 = stack.removeLast();
     num operand1 = stack.removeLast();
     num result = operand1 * operand2;
     stack.add(result);
-
   }
 }
 
 class DivideCommand implements Command {
   @override
   void apply(List<num> stack) {
-
     if (stack.length < 2) {
       throw Exception("Insufficient operands for division");
     }
@@ -78,35 +55,33 @@ class DivideCommand implements Command {
     if (divisor == 0) {
       throw Exception("Division by zero error");
     }
-    num result = dividend / divisor; // Rækkefølge
+    num result = dividend / divisor;
     stack.add(result);
   }
-
 }
 
-class PushCommand implements Command {
-  @override
-  void apply(List<num> stack) {
+class Calculator {
+  List<num> stack = [];
 
-    if (stack.length < 2) {
-      throw Exception("Insufficient operands for division");
-    }
-    num divisor = stack.removeLast();
-    num dividend = stack.removeLast();
-    if (divisor == 0) {
-      throw Exception("Division by zero error");
-    }
-    num result = dividend / divisor; // Rækkefølge
-    stack.add(result);
-
+  void push(num value) {
+    stack.add(value);
   }
 
+  void execute(Command command) {
+    command.apply(stack);
+  }
+}
+
+class CalculatorScreen extends StatefulWidget {
+  const CalculatorScreen({Key? key}) : super(key: key);
+
+  @override
+  State<CalculatorScreen> createState() => _CalculatorScreenState();
 }
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
-  String number1 = ""; // . 0-9
-  String operand = ""; // + - * /
-  String number2 = ""; // . 0-9
+  final Calculator calculator = Calculator();
+  String displayValue = "0";
 
   @override
   Widget build(BuildContext context) {
@@ -124,9 +99,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   alignment: Alignment.bottomRight,
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    "$number1$operand$number2".isEmpty
-                        ? "0"
-                        : "$number1$operand$number2",
+                    displayValue,
                     style: const TextStyle(
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
@@ -157,7 +130,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  Widget buildButton(value) {
+  Widget buildButton(String value) {
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: Material(
@@ -185,95 +158,68 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  // ########
   void onBtnTap(String value) {
     if (value == Btn.del) {
       delete();
-      return;
-    }
-
-    if (value == Btn.clr) {
+    } else if (value == Btn.clr) {
       clearAll();
-      return;
-    }
-
-    if (value == Btn.calculate) {
+    } else if (value == Btn.calculate) {
       calculate();
-      return;
+    } else if (value == Btn.add) {
+      calculator.execute(AddCommand());
+      updateDisplay(calculator.stack.last);
+    } else if (value == Btn.subtract) {
+      calculator.execute(SubCommand());
+      updateDisplay(calculator.stack.last);
+    } else if (value == Btn.multiply) {
+      calculator.execute(MultiCommand());
+      updateDisplay(calculator.stack.last);
+    } else if (value == Btn.divide) {
+      calculator.execute(DivideCommand());
+      updateDisplay(calculator.stack.last);
+    } else {
+      appendValue(value);
     }
-
-    appendValue(value);
   }
 
-  // ##############
-  // calculates the result
   void calculate() {
-
+    calculator.push(double.parse(displayValue));
+    displayValue = "0";
   }
 
-  // clears all output
   void clearAll() {
     setState(() {
-      number1 = "";
-      operand = "";
-      number2 = "";
+      calculator.stack.clear();
+      displayValue = "0";
     });
   }
 
-  // delete one from the end
   void delete() {
-    if (number2.isNotEmpty) {
-      // 12323 => 1232
-      number2 = number2.substring(0, number2.length - 1);
-    } else if (operand.isNotEmpty) {
-      operand = "";
-    } else if (number1.isNotEmpty) {
-      number1 = number1.substring(0, number1.length - 1);
-    }
-
-    setState(() {});
+    setState(() {
+      if (displayValue.length > 1) {
+        displayValue = displayValue.substring(0, displayValue.length - 1);
+      } else {
+        displayValue = "0";
+      }
+    });
   }
 
-  // #############
-  // appends value to the end
   void appendValue(String value) {
-    // number1 opernad number2
-    // 234       +      5343
-
-    // if is operand and not "."
-    if (value != Btn.dot && int.tryParse(value) == null) {
-      // operand pressed
-      if (operand.isNotEmpty && number2.isNotEmpty) {
-        // TODO calculate the equation before assigning new operand
-        calculate();
+    setState(() {
+      if (displayValue == "0") {
+        displayValue = value;
+      } else {
+        displayValue += value;
       }
-      operand = value;
-    }
-    // assign value to number1 variable
-    else if (number1.isEmpty || operand.isEmpty) {
-      // check if value is "." | ex: number1 = "1.2"
-      if (value == Btn.dot && number1.contains(Btn.dot)) return;
-      if (value == Btn.dot && (number1.isEmpty || number1 == Btn.n0)) {
-        // ex: number1 = "" | "0"
-        value = "0.";
-      }
-      number1 += value;
-    }
-    // assign value to number2 variable
-    else if (number2.isEmpty || operand.isNotEmpty) {
-      // check if value is "." | ex: number1 = "1.2"
-      if (value == Btn.dot && number2.contains(Btn.dot)) return;
-      if (value == Btn.dot && (number2.isEmpty || number2 == Btn.n0)) {
-        // number1 = "" | "0"
-        value = "0.";
-      }
-      number2 += value;
-    }
-
-    setState(() {});
+    });
   }
 
-  // ########
+  void updateDisplay(num value) {
+    setState(() {
+      displayValue = value.toString();
+    });
+  }
+
   Color getBtnColor(value) {
     return [Btn.del, Btn.clr, Btn.calculate].contains(value)
         ? Colors.deepOrangeAccent
@@ -287,3 +233,4 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         : Colors.blueGrey;
   }
 }
+
