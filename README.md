@@ -8,4 +8,4 @@ To do calculus on the stack, you need to have at least 2 different numbers. The 
 
 After having performed an operation, the stack will update accordingly. You can now proceed to add more numbers to the stack, or do more operations on the stack. 
 
-
+Hosted on https://amorags.github.io/calc_app/
